@@ -1,4 +1,3 @@
-
 # =============================================
 # topology_2subnets_6hosts.py
 # ---------------------------------------------
@@ -42,7 +41,7 @@ class TwoSubnetSmallTopo(Topo):
         def add_subnet(subnet_id: int, host_count: int):
             # 5 switches: sX0 main + sX1..sX4 leaves
             s_main = self.addSwitch(f's{subnet_id}0', protocols='OpenFlow13')
-            leaves = [self.addSwitch(f's{subnet_id}{i}', protocols='OpenFlow13') for i in range(1,5)]
+            leaves = [self.addSwitch(f's{subnet_id}{i}', protocols='OpenFlow13') for i in range(1,3)]
             for s in leaves:
                 self.addLink(s_main, s)
             # Router uplink
@@ -54,7 +53,7 @@ class TwoSubnetSmallTopo(Topo):
             for i in range(1, host_count + 1):
                 hip = f'10.0.{subnet_id}.{i}/24'
                 h = self.addHost(f'h{subnet_id}_{i:02d}', ip=hip, defaultRoute=f'via 10.0.{subnet_id}.254')
-                self.addLink(h, cycle[(i-1) % 5])
+                self.addLink(h, cycle[(i-1) % 3])
 
         add_subnet(1, host_count=3)
         add_subnet(2, host_count=3)
@@ -72,13 +71,10 @@ def _all_hosts(net):
 
 
 def run_iperf_all_hosts(net):
-    info('
-*** Running iperf across all hosts (TCP & UDP)
-')
+    info('*** Running iperf across all hosts (TCP & UDP)')
     hosts = _all_hosts(net)
     if not hosts:
-        info('No hosts found for iperf tests.
-')
+        info('No hosts found for iperf tests.')
         return
 
     # Prefer iperf3 if present on first host; otherwise iperf
@@ -99,28 +95,22 @@ def run_iperf_all_hosts(net):
     for h in hosts:
         h.cmd(server_cmd)
     time.sleep(1)
-    info(f"* iperf servers started on {len(hosts)} hosts (port {port})
-")
+    info(f"* iperf servers started on {len(hosts)} hosts (port {port})")
 
     # Run tests pairwise (sequential to avoid interference)
     for src in hosts:
         for dst in hosts:
             if src is dst:
                 continue
-            info(f"
-* TCP: {src.name} -> {dst.IP()}
-")
+            info(f"* TCP: {src.name} -> {dst.IP()}")
             info(tcp_client(src, dst.IP()))
-            info(f"* UDP: {src.name} -> {dst.IP()} (20M)
-")
+            info(f"* UDP: {src.name} -> {dst.IP()} (20M)")
             info(udp_client(src, dst.IP()))
 
     # Cleanup servers
     for h in hosts:
         h.cmd(pkill_cmd)
-    info('
-*** iperf tests completed and servers stopped.
-')
+    info('*** iperf tests completed and servers stopped.')
 
 
 def run():
@@ -134,38 +124,29 @@ def run():
         autoSetMacs=True,
         autoStaticArp=False,
     )
-    info('
-*** Adding remote controller (Ryu @ 127.0.0.1:6653)
-')
+    info('*** Adding remote controller (Ryu @ 127.0.0.1:6653)')
     net.addController('c0', controller=RemoteController, ip='127.0.0.1', port=6653)
 
-    info('
-*** Starting network
-')
+    info('*** Starting network')
     net.start()
 
     r0 = net.get('r0')
-    info('
-*** Router interfaces:
-')
+    info('*** Router interfaces:')
     info(r0.cmd('ip -br -c a'))
 
     # Quick gateway pings
     for sid in (1,2):
         h = net.get(f'h{sid}_01')
-        info(f'
-Pinging gateway from {h.name}:
-')
+        info(f'Pinging gateway from {h.name}:')
         info(h.cmd(f'ping -c2 10.0.{sid}.254'))
 
     # Run iperf across all hosts
     run_iperf_all_hosts(net)
 
-    info('
-*** Mininet CLI (type exit to stop)
-')
+    info('*** Mininet CLI (type exit to stop)')
     CLI(net)
     net.stop()
 
 if __name__ == '__main__':
     run()
+

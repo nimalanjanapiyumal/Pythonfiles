@@ -1,4 +1,3 @@
-
 # =============================================
 # ryu_app_telemetry.py
 # ---------------------------------------------
@@ -145,12 +144,3 @@ class Telemetry13(app_manager.RyuApp):
                 w.writeheader()
             for r in rows:
                 w.writerow(r)
-
-# ---------------------------------------------
-# USAGE
-#   POLL_INTERVAL=2 TELEM_LOG_DIR=./logs \
-#   python -m ryu.cmd.manager --ofp-tcp-listen-port 6653 \
-#     ryu_app_learning_switch.py ryu_app_firewall.py ryu_app_load_balancer.py ryu_app_telemetry.py
-# Outputs CSVs like ./logs/port_stats_<dpid>.csv and flow_stats_<dpid>.csv
-# ---------------------------------------------
-

@@ -1,6 +1,3 @@
-# =============================================
-# ryu_app_load_balancer.py (Optional)
-# ---------------------------------------------
 # Minimal VIP load balancer with ARP proxy for the VIP.
 # Distributes flows across a server pool (round-robin) and rewrites L3/L2 on ingress switch.
 # NOTE: This demo assumes servers are in subnet 10.0.1.0/24 and VIP is 10.0.1.100.
@@ -23,7 +20,7 @@ class SimpleLoadBalancer(app_manager.RyuApp):
     VIP_MAC = '00:aa:bb:cc:dd:ee'  # virtual MAC for VIP ARP replies
     # Backend servers (populate dynamically if MAC unknown)
     SERVER_POOL = [
-        {'ip': '10.0ping1.1', 'mac': None},
+        {'ip': '10.0.1.1', 'mac': None},
         {'ip': '10.0.1.2', 'mac': None},
     ]
 
